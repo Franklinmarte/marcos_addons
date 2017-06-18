@@ -114,26 +114,46 @@ excepcionesRNC = ['501378067', '501656006', '501620371', '501651319', '501651845
                   '504681442', '504654542']
 
 
-def mod11(value):
-    num = list(map(int, value))  # convierte string en lista de string
-    suma = 0
-    pesoRNC = [7, 9, 8, 6, 5, 4, 3, 2]  # Mod11 pero el RNC utiliza su propio sistema de peso.
-    for index in range(len(pesoRNC)):
-        suma += (pesoRNC[index] * num[index])
+def mod10(cedula, alphabet='0123456789'):
+    """
+    Aplica el Algoritmo de Luhn para validar la numeración de la
+    Cédula de Identidad Personal
+    :param cedula: recibe una numeración cédula
+    """
+    cedula = cedula.replace("-", "")
+    num = list(map(int, cedula))
+    base = len(alphabet)
 
-    resto = suma % 11
-    if resto == 0:
-        digito = 2
-    elif resto == 1:
-        digito = 1
-    else:
-        digito = 11 - resto
-    return digito == int(value[-1])
+    odd_sum = sum(num[::2])
+    even_sum = sum([sum(divmod(2 * d, base)) for d in num[1::2]])
+    return (odd_sum + even_sum) % 10 == 0
 
 
-def mod10(number):
-    num = map(int, str(number))
-    return sum(num[::-2] + [sum(divmod(d * 2, 10)) for d in num[-2::-2]]) % 10 == 0
+def mod11_rnc(rnc):
+    """
+    Aplica el Algoritmo de Modulus 11 para validar la numeración del
+    Registro Nacional del Contribuyente. El peso utilizado no es el original
+    del Mod 11, ya que la DGII utiliza su propio sistema de peso para validar
+    la integridad del RNC.
+    Primero se remueve el dígito de verificador del parámetro de rnc recibido,
+    y solo se validan 8 dígitos, ya que el peso utilizado por la DGII solo
+    posee 8 posiciones.
+    Cada dígito del RNC se  multiplica por su peso, y los resultados se suman.
+    Luego el resultado de la suma divide entre 11, para identificar el
+    remanente.
+    Para generar el dígito verificador (dv), se valida el remanente:
+     - Si el remanente es igual a 0, el dv es 2.
+     - Si el remanente es igual a 1, el dv es 1.
+     - Si el remannente es otro número, debe calcularse el dv.
+    :param rnc: recibe una numeración de RNC
+    """
+    rnc = rnc.replace("-", "")
+    number = rnc[:-1]
+    rnc_weight = [7, 9, 8, 6, 5, 4, 3, 2]
+    result = sum(p * (int(r)) for p, r in zip(rnc_weight, number)) % 11
+    check_digit = str((10 - result) % 9 + 1)
+
+    return check_digit == rnc[-1]
 
 
 def is_identification(value):
@@ -147,17 +167,25 @@ def is_identification(value):
     if len(value) > 0:
         value = value.strip()
 
-    if (len(value) == 9 or len(value) == 11) and value.isdigit():  # Valida logitud y Valida que solo sean numeros
-        if len(value) == 11:  # si tiene 11 digitos es una cedula
-            if value in excepcionesCedulas:  # valida en el listado
+    # Valida que solo sean números:
+    if value.isdigit():
+        # Si tiene 11 digitos es una cédula
+        if len(value) == 11:
+            # Valida en el listado de excepciones antes de aplicar algoritmos,
+            # de encontrar una coicidencia, es una identificación válida.
+            if value in excepcionesCedulas:
                 return True
-            else:  # valida el algoritmo de (LUHN)
+            # Si no está en el listado aplica el algoritmo de LUHN:
+            else:
                 return mod10(value)
-        else:
+        # Si tiene 9 dígitos es un RNC
+        elif len(value) == 9:
+            # Valida en el listado de excepciones
             if value in excepcionesRNC:
                 return True
+            # Si no está en el listado aplica el algoritmo de Modulus 11:
             else:
-                return mod11(value)
+                return mod11_rnc(value)
     else:
         return False
 
