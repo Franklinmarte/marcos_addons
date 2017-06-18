@@ -195,10 +195,10 @@ def is_ncf(value, type):
                     value[3:6]) and int(value[6:9]) and value[9:11] == '04' and int(value[11:20]):
                 return True
             elif type == "in_invoice" and value[0] in ('A', 'P') and int(value[1:3]) and int(value[3:6]) and int(
-                    value[6:9]) and value[9:11] in ('01', '14', '15', '11', '13') and int(value[11:20]):
+                    value[6:9]) and value[9:11] in ('01', '03', '11', '13', '14') and int(value[11:20]):
                 return True
             elif type == "out_invoice" and value[0] in ('A', 'P') and int(value[1:3]) and int(value[3:6]) and int(
-                    value[6:9]) and value[9:11] in ('01', '02', '14', '15', '11', '13') and int(value[11:20]):
+                    value[6:9]) and value[9:11] in ('01', '02', '03', '11', '12', '14', '15') and int(value[11:20]):
                 return True
         except:
             pass
