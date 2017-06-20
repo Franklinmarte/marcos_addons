@@ -153,7 +153,8 @@ class ResPartner(models.Model):
         vals = self.validate_vat_or_name(vals)
         if not isinstance(vals, dict):
             return vals
-
+        if vals.get('is_company', False):
+            vals['sale_fiscal_type'] = 'fiscal'
         return super(ResPartner, self).create(vals)
 
     @api.model
