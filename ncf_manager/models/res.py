@@ -140,7 +140,7 @@ class ResPartner(models.Model):
         validation = self.validate_vat_or_name(vals)
         if not isinstance(validation, dict) and self:
             raise exceptions.ValidationError(
-                u"Ya existe un contacto registra    do con esta identificación a nombre de {}!".format(vals.name))
+                u"Ya existe un contacto registrado con esta identificación a nombre de {}!".format(vals.name))
         elif isinstance(validation, dict) and self:
             vals = validation
         return super(ResPartner, self).write(vals)

@@ -136,7 +136,7 @@ class DgiiPurchaseReport(models.Model):
             TOTAL_MONTO_FACTURADO += inv.amount_untaxed*CURRENCY_RATE
 
             if not inv.partner_id.vat:
-                raise exceptions.UserError(u"El número de RNC/Cédula del proveedor {} no es valido para el NCF {}".format(inv.partner_id.name, inv.move_name))
+                raise exceptions.UserError(u"El número de RNC/Cédula del proveedor {} no es valido para el NCF {}".format(inv.partner_id.name, inv.number))
 
 
             RNC_CEDULA = re.sub("[^0-9]", "", inv.partner_id.vat.strip())
@@ -144,17 +144,17 @@ class DgiiPurchaseReport(models.Model):
             TIPO_BIENES_SERVICIOS_COMPRADOS = inv.purchase_fiscal_type
 
             if not TIPO_BIENES_SERVICIOS_COMPRADOS:
-                raise exceptions.UserError(u"Debe de definir el tipo de gasto para la posición fiscal {}! en la factura {}".format(inv.fiscal_position_id.name, inv.move_name))
+                raise exceptions.UserError(u"Debe de definir el tipo de gasto para la posición fiscal {}! en la factura {}".format(inv.fiscal_position_id.name, inv.number))
 
-            if not self.env['marcos.api.tools'].is_ncf(inv.move_name, inv.type):
-                raise exceptions.UserError(u"El número de NCF {} no es valido!".format(inv.move_name))
+            if not self.env['marcos.api.tools'].is_ncf(inv.number, inv.type):
+                raise exceptions.UserError(u"El número de NCF {} no es valido!".format(inv.number))
 
             NUMERO_COMPROBANTE_MODIFICADO = "".rjust(19)
 
             if inv.type == "in_invoice":
-                NUMERO_COMPROBANTE_FISCAL = inv.move_name
+                NUMERO_COMPROBANTE_FISCAL = inv.number
             elif inv.type == "in_refund":
-                NUMERO_COMPROBANTE_FISCAL = inv.move_name
+                NUMERO_COMPROBANTE_FISCAL = inv.number
                 NUMERO_COMPROBANTE_MODIFICADO = inv.origin
 
             FECHA_COMPROBANTE = inv.date_invoice
